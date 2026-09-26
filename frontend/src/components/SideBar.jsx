@@ -11,6 +11,8 @@ import {
    Plus,
    User,
    X,
+   Sun,
+   Moon,
 } from "lucide-react";
 import { useState } from "react";
 import { useEffect } from "react";
@@ -26,6 +28,7 @@ import { createConversation } from "../features/createConversation";
 import logOut from "../features/logOut";
 import { setUserdata } from "../redux/userSlice";
 import BillingDrawer from "./BillingDrawer";
+import { useTheme } from "../theme/ThemeContext";
 function SideBar() {
    const [collapsed, setCollapsed] = useState(false);
    const dispatch = useDispatch();
@@ -36,6 +39,7 @@ function SideBar() {
    const { userData } = useSelector((state) => state.user);
    const [showBilling, setShowBilling] = useState(false);
    const [mobileOpen, setMobileOpen] = useState(false);
+   const { theme, toggleTheme } = useTheme();
    useEffect(() => {
       const getConv = async () => {
          const data = await getConversations();
@@ -57,6 +61,15 @@ function SideBar() {
                onClick={() => setCollapsed(false)}
             >
                <PanelRight />
+            </button>
+
+            <button
+               aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+               title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+               className="flex items-center justify-center w-9 h-9 rounded-xl text-slate-500 hover:text-slate-200 hover:bg-white/[0.05] transition-colors duration-150 bg-transparent border-none cursor-pointer"
+               onClick={toggleTheme}
+            >
+               {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
             </button>
 
             <button
@@ -158,6 +171,14 @@ function SideBar() {
                      onClick={() => dispatch(setSelectedConversation(null))}
                   >
                      <PenSquare size={14} />
+                  </button>
+                  <button
+                     aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+                     title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+                     className="flex items-center justify-center w-7 h-7 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/[0.05] transition-colors duration-150 bg-transparent border-none cursor-pointer"
+                     onClick={toggleTheme}
+                  >
+                     {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
                   </button>
                </div>
 
