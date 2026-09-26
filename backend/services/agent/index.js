@@ -1,32 +1,34 @@
-import express from "express"
-import dotenv from "dotenv"
-import connectDb from "./config/db.js"
-import router from "./routes/agent.route.js"
-dotenv.config()
+import express from "express";
+import dns from "dns";
+import dotenv from "dotenv";
+import connectDb from "./config/db.js";
+import router from "./routes/agent.route.js";
+dotenv.config();
 
-const port =process.env.PORT
+dns.setServers(["8.8.8.8", "0.0.0.0"]);
 
-const app=express()
+const port = process.env.PORT;
 
-app.use(express.json())
-app.use("/",router)
+const app = express();
 
-app.use((err,req,res,next)=>{
-  console.log(err)
+app.use(express.json());
+app.use("/", router);
 
-  if(err.status){
-    return res.status(err.status).json(err.data)
-  }
+app.use((err, req, res, next) => {
+   console.log(err);
 
-  return res.status(500).json({message:`agent error ${error}`})
-})
+   if (err.status) {
+      return res.status(err.status).json(err.data);
+   }
 
+   return res.status(500).json({ message: `agent error ${error}` });
+});
 
-app.get("/",(req,res)=>{
-    res.json({message:"hello from agent"})
-})
+app.get("/", (req, res) => {
+   res.json({ message: "hello from agent" });
+});
 
-app.listen(port,()=>{
-    console.log(`agent started at ${port}`)
-    connectDb()
-})
+app.listen(port, () => {
+   console.log(`agent started at ${port}`);
+   connectDb();
+});
