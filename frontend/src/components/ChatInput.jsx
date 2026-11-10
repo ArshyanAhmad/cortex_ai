@@ -97,14 +97,20 @@ function ChatInput() {
 
 
 
-    dispatch(addMessage({ role: "user", content: value.trim() }))
+    const userDisplayContent = value.trim() || (selectedFile ? `[Image: ${selectedFile.name}]` : "")
+    dispatch(addMessage({ role: "user", content: userDisplayContent }))
     setValue("")
-    const data = await sendMessage(formData)
-    dispatch(setIsLoading(false))
-    setSelectedFile(null)
-    dispatch(setArtifacts(data.artifacts || []))
-    dispatch(addMessage({ role: "assistant", content: data?.answer, images: data?.images }))
-    console.log(data)
+
+    try {
+      const data = await sendMessage(formData)
+      dispatch(setArtifacts(data?.artifacts || []))
+      dispatch(addMessage({ role: "assistant", content: data?.answer, images: data?.images || [] }))
+      console.log(data)
+    } finally {
+      dispatch(setIsLoading(false))
+      setSelectedFile(null)
+      if (fileRef.current) fileRef.current.value = ""
+    }
   }
 
   const agents = [
@@ -254,9 +260,9 @@ function ChatInput() {
             </button>
           </div>
           <button
-            disabled={!value && isLoading}
+            disabled={(!value.trim() && !selectedFile) || isLoading}
             onClick={handleSendMessage}
-            className={`flex items-center justify-center w-8 h-8 rounded-lg border-none cursor-pointer transition-all duration-150 ${value.trim() ? "bg-linear-to-br from-indigo-500 to-violet-700 hover:opacity-90 text-white" : "bg-white/[0.05] text-slate-600 cursor-not-allowed"}`}>
+            className={`flex items-center justify-center w-8 h-8 rounded-lg border-none cursor-pointer transition-all duration-150 ${(value.trim() || selectedFile) ? "bg-linear-to-br from-indigo-500 to-violet-700 hover:opacity-90 text-white" : "bg-white/[0.05] text-slate-600 cursor-not-allowed"}`}>
           <Send size={15} />
         </button>
       </div>

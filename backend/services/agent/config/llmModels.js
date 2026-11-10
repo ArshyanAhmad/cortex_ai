@@ -8,11 +8,13 @@ import { ChatOpenRouter } from "@langchain/openrouter";
 const groq = new ChatGroq({
    model: "openai/gpt-oss-120b",
    temperature: 0,
+   apiKey: process.env.GROQ_API_KEY,
 });
 
 const gemini = new ChatGoogleGenerativeAI({
-   model: "gemini-2.5-flash",
+   model: process.env.GEMINI_MODEL || "gemini-2.5-flash",
    temperature: 0,
+   apiKey: process.env.GOOGLE_API_KEY,
 });
 
 const openrouter = new ChatOpenRouter({
@@ -34,6 +36,8 @@ export const getModel = async (agent) => {
          return openrouter;
 
       case "imageAnalyzer":
+      case "pdf-rag":
+      case "pdfRag":
          return gemini;
 
       default:

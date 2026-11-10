@@ -1,8 +1,25 @@
 import { getModel } from "../config/llmModels.js"
-import { agent } from "../controllers/agent.controller.js"
 
 export const router = async (state) => {
 
+  // File detection always takes priority over manual agent selection
+  if (state.file) {
+    if (state.file.mimetype === "application/pdf") {
+      return {
+        ...state,
+        agent: "pdfRag"
+      }
+    }
+
+    if (state.file.mimetype.startsWith("image/")) {
+      return {
+        ...state,
+        agent: "imageAnalyzer"
+      }
+    }
+  }
+
+  // No file: respect manually selected agent (unless it's auto)
   if (state.agent && state.agent !== "auto") {
     return {
       ...state,
@@ -10,22 +27,7 @@ export const router = async (state) => {
     }
   }
 
-  if(state.file){
-if(state.file.mimetype==="application/pdf"){
-    return {
-      ...state,
-      agent:"pdfRag"
-    }
-  }
-
-    if(state.file.mimetype.startsWith("image/")){
-    return {
-      ...state,
-      agent:"imageAnalyzer"
-    }
-  }
-  }
-
+  // No file, no manual agent (auto mode): use LLM to route
   
 
 

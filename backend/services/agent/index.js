@@ -11,17 +11,19 @@ const port = process.env.PORT;
 
 const app = express();
 
-app.use(express.json());
+app.use(express.json({ limit: "25mb" }));
+app.use(express.urlencoded({ extended: true, limit: "25mb" }));
 app.use("/", router);
 
 app.use((err, req, res, next) => {
-   console.log(err);
+   console.error("Agent service error:", err?.message || err);
 
-   if (err.status) {
+   if (err.status && err.data) {
       return res.status(err.status).json(err.data);
    }
 
-   return res.status(500).json({ message: `agent error ${error}` });
+   const safeMessage = err?.response?.data?.message || err?.data?.message || err?.message || "Internal agent error";
+   return res.status(err.status || 500).json({ message: safeMessage });
 });
 
 app.get("/", (req, res) => {

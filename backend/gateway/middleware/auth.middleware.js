@@ -6,7 +6,7 @@ const protect = async (req, res, next) => {
       console.log("session", sessionId);
 
       if (!sessionId) {
-         return res.status(400).json({ message: "unauthorized" });
+         return res.status(401).json({ message: "unauthorized" });
       }
       const session = await redis.get(`session-${sessionId}`);
       console.log(session);
