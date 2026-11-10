@@ -1,11 +1,11 @@
-import { Check, Copy, ExternalLink, FileX2, X } from 'lucide-react'
+import { Check, Copy, ExternalLink, FileText, FileX2, X } from 'lucide-react'
 import React from 'react'
 import { useState } from 'react'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
-function MessageBubble({ role, content, images }) {
+function MessageBubble({ role, content, images, file }) {
   const isUser = role === "user"
   const [lightBox, setLightBox] = useState(null)
   const [copiedCode, setCopiedCode] = useState("")
@@ -19,6 +19,9 @@ function MessageBubble({ role, content, images }) {
   }
 
 
+  const isPdf = file?.type === "application/pdf" || (typeof file?.name === "string" && file.name.toLowerCase().endsWith(".pdf"))
+  const isImageFile = file?.type?.startsWith("image/") || (typeof file?.name === "string" && /\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(file.name))
+
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div className={`w-fit max-w-[92vw] md:max-w-[72%]
@@ -30,8 +33,40 @@ function MessageBubble({ role, content, images }) {
           : " text-slate-200 rounded-tl-sm"
         }`}>
 
+        {file && (
+          <div className={`flex items-center gap-2.5 rounded-xl px-3 py-2 text-left mb-2.5 ${
+            isUser ? "bg-black/25 border border-white/15" : "bg-white/[0.04] border border-white/10"
+          }`}>
+            {isPdf ? (
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-500/20 text-red-300">
+                <FileText size={18} />
+              </div>
+            ) : isImageFile && (file.previewUrl || file.url) ? (
+              <img
+                src={file.previewUrl || file.url}
+                alt={file.name || "attachment"}
+                onClick={() => setLightBox(file.previewUrl || file.url)}
+                className="h-9 w-9 shrink-0 rounded-lg object-cover cursor-zoom-in border border-white/20"
+              />
+            ) : (
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-300">
+                <FileText size={18} />
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium text-white truncate max-w-[200px] sm:max-w-[280px]">
+                {file.name || "Attached File"}
+              </p>
+              {file.size ? (
+                <p className="text-[10px] text-white/70">
+                  {Math.ceil(file.size / 1024)} KB
+                </p>
+              ) : null}
+            </div>
+          </div>
+        )}
 
-        {images.length > 0 && (
+        {images?.length > 0 && (
           <div className='flex flex-wrap gap-3 mt-4'>
             {images.map((img, i) => (
               <img
@@ -48,8 +83,9 @@ function MessageBubble({ role, content, images }) {
         )}
 
 
-        <Markdown
-          remarkPlugins={[remarkGfm]}
+        {content ? (
+          <Markdown
+            remarkPlugins={[remarkGfm]}
           components={{
             h1: ({ children }) => (
               <h1 className='text-2xl font-bold mt-5 mb-3'>{children}</h1>
@@ -179,6 +215,7 @@ function MessageBubble({ role, content, images }) {
         >
           {content}
         </Markdown>
+        ) : null}
 
 
 

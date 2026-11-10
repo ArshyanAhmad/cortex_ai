@@ -13,7 +13,14 @@ export const agent=async (req,res,next) => {
 
         try {
             await axios.post(`${process.env.CHAT_SERVICE}/save-message`,{
-                conversationId,role:"user",content:prompt || (file ? `Attached ${file.originalname}` : "")
+                conversationId,
+                role:"user",
+                content:prompt || (file ? `Attached ${file.originalname}` : ""),
+                file: file ? {
+                    name: file.originalname,
+                    size: file.size,
+                    type: file.mimetype
+                } : undefined
             })
         } catch (chatErr) {
             console.error("Failed to save user message to chat service:", chatErr?.message || chatErr)

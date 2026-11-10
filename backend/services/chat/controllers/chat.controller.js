@@ -44,13 +44,14 @@ export const updateConversation=async (req,res) => {
 
 export const saveMessage=async (req,res) => {
     try {
-        const {conversationId,role,content,images,artifacts}=req.body
+        const {conversationId,role,content,images,artifacts,file}=req.body
         const message=await Message.create({
             conversationId,
             content,
             role,
             images,
-            artifacts
+            artifacts,
+            file
         })
         return res.status(200).json(message)
     } catch (error) {

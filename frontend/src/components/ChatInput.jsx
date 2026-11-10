@@ -80,26 +80,40 @@ function ChatInput() {
       conversation = conv
     }
 
+    const fileToSend = selectedFile
+    const promptToSend = value.trim()
+
     if (conversation.title == "New Chat") {
-      await updateConversation({ id: conversation?._id, title: value.trim() })
-      dispatch(setConvTitle({ conversationId: conversation?._id, title: value.slice(0, 40) }))
+      const chatTitle = promptToSend || fileToSend?.name || "New Chat"
+      await updateConversation({ id: conversation?._id, title: chatTitle })
+      dispatch(setConvTitle({ conversationId: conversation?._id, title: chatTitle.slice(0, 40) }))
     }
 
-
-    console.log(selectedFile)
     const formData = new FormData()
-    formData.append("prompt", value.trim())
+    formData.append("prompt", promptToSend)
     formData.append("conversationId", conversation?._id)
     formData.append("agent", selectedAgent.toLowerCase())
-    if (selectedFile) {
-      formData.append("file", selectedFile)
+    if (fileToSend) {
+      formData.append("file", fileToSend)
     }
 
+    const fileMetadata = fileToSend ? {
+      name: fileToSend.name,
+      size: fileToSend.size,
+      type: fileToSend.type,
+      previewUrl: fileToSend.type.startsWith("image/") ? URL.createObjectURL(fileToSend) : null
+    } : null
 
+    dispatch(addMessage({
+      role: "user",
+      content: promptToSend,
+      file: fileMetadata
+    }))
 
-    const userDisplayContent = value.trim() || (selectedFile ? `[Image: ${selectedFile.name}]` : "")
-    dispatch(addMessage({ role: "user", content: userDisplayContent }))
+    // Clear input text and attached file immediately upon sending
     setValue("")
+    setSelectedFile(null)
+    if (fileRef.current) fileRef.current.value = ""
 
     try {
       const data = await sendMessage(formData)
@@ -108,8 +122,6 @@ function ChatInput() {
       console.log(data)
     } finally {
       dispatch(setIsLoading(false))
-      setSelectedFile(null)
-      if (fileRef.current) fileRef.current.value = ""
     }
   }
 
@@ -221,7 +233,7 @@ function ChatInput() {
                   {selectedFile?.name}
                 </p>
                 <p className='text-[10px] text-slate-500'>
-                  {Math.ceil(selectedFile.size)}KB
+                  {Math.ceil(selectedFile.size / 1024)} KB
                 </p>
 
               </div>
